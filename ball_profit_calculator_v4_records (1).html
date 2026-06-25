@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>球課收益計算器</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+    .wrap {
+      width: min(1120px, 94%);
+      margin: 28px auto;
+    }
+    .header {
+      background: linear-gradient(135deg, #111827, #374151);
+      color: white;
+      border-radius: 22px;
+      padding: 26px;
+      margin-bottom: 18px;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.18);
+    }
+    .header h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+    }
+    .header p {
+      margin: 0;
+      opacity: 0.86;
+      line-height: 1.6;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e5e7eb;
+    }
+    h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+    }
+    h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    button {
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button.tab {
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #374151;
+    }
+    button.tab.active {
+      background: #111827;
+      color: white;
+    }
+    .primary {
+      background: #111827;
+      color: white;
+      width: 100%;
+      margin-top: 16px;
+    }
+    .secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+      color: #374151;
+      margin-bottom: 7px;
+    }
+    input, select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+    }
+    input:focus, select:focus {
+      border-color: #111827;
+      box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+    }
+    .result, .summary {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .box {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 15px;
+    }
+    .box .name {
+      color: #6b7280;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .box .num {
+      font-size: 21px;
+      font-weight: 900;
+      color: #111827;
+    }
+    .placeholder {
+      padding: 22px;
+      background: #f9fafb;
+      border-radius: 16px;
+      color: #6b7280;
+      line-height: 1.7;
+      border: 1px dashed #cbd5e1;
+    }
+    .formula, .muted {
+      font-size: 14px;
+      color: #6b7280;
+      line-height: 1.75;
+      margin-top: 12px;
+    }
+    .warning, .success {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      display: none;
+    }
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+    .success {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+    }
+    .record-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1180px;
+      background: white;
+    }
+    th, td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-weight: 900;
+    }
+    td { color: #374151; }
+    tr:last-child td { border-bottom: 0; }
+    .delete-btn {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 13px;
+    }
+    @media (max-width: 980px) {
+      .result, .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .record-controls { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .wrap { margin: 16px auto; width: min(96%, 560px); }
+      .header { padding: 22px; }
+      .header h1 { font-size: 23px; }
+      .grid, .grid-3, .result, .summary, .record-controls { grid-template-columns: 1fr; }
+      button.tab { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="header">
+      <h1>球課收益計算器</h1>
+      <p>匹克球體驗營、個人教練收益試算，並可記錄日期、學生、地點，月底統計教練與公司分帳。</p>
+    </section>
+
+    <section class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="showMain('pickleball', this)">匹克球</button>
+        <button class="tab" onclick="showMain('tennis', this)">網球</button>
+      </div>
+
+      <div id="pickleball" class="section active">
+        <div class="tabs">
+          <button class="tab active" onclick="showSub('camp', this)">體驗營</button>
+          <button class="tab" onclick="showSub('coach', this)">個人教練</button>
+        </div>
+
+        <div id="camp" class="section active">
+          <h2>匹克球｜體驗營</h2>
+          <div class="grid">
+            <div>
+              <label>日期</label>
+              <input id="campDate" type="date" />
+            </div>
+            <div>
+              <label>教練名稱</label>
+              <input id="campCoachName" type="text" placeholder="例：小紀教練" />
+            </div>
+            <div>
+              <label>學生 / 團體名稱</label>
+              <input id="campStudentName" type="text" placeholder="例：王小明、企業體驗營、親子團" />
+            </div>
+            <div>
+              <label>上課地點</label>
+              <input id="campLocation" type="text" placeholder="例：Pickzone 朝馬館" />
+            </div>
+            <div>
+              <label>人數</label>
+              <input id="campPeople" type="number" value="8" min="0" oninput="calcCamp()" />
+            </div>
+            <div>
+              <label>小時</label>
+              <input id="campHours" type="number" value="2" min="0" step="0.5" oninput="calcCamp()" />
+            </div>
+            <div>
+              <label>每人收費</label>
+              <input id="campPrice" type="number" value="500" min="0" oninput="calcCamp()" />
+            </div>
+            <div>
+              <label>場地費 / 每面 / 每小時</label>
+              <input id="venuePerHour" type="number" value="600" min="0" oninput="calcCamp()" />
+            </div>
+            <div>
+              <label>每面場最多人數</label>
+              <input id="peoplePerCourt" type="number" value="8" min="1" oninput="calcCamp()" />
+            </div>
+            <div>
+              <label>備註</label>
+              <input id="campNote" type="text" placeholder="例：已收款 / 公司客戶 / 補課" />
+            </div>
+          </div>
+
+          <div class="result">
+            <div class="box"><div class="name">需要場數</div><div class="num" id="campCourts">0 面</div></div>
+            <div class="box"><div class="name">總金額</div><div class="num" id="campTotal">NT$0</div></div>
+            <div class="box"><div class="name">場地費</div><div class="num" id="campVenue">NT$0</div></div>
+            <div class="box"><div class="name">教練所得</div><div class="num" id="campCoachIncome">NT$0</div></div>
+            <div class="box"><div class="name">公司收入</div><div class="num" id="campCompany">NT$0</div></div>
+          </div>
+
+          <button class="primary" onclick="saveCampRecord()">新增到日期紀錄</button>
+          <div id="campWarning" class="warning"></div>
+          <div id="campSuccess" class="success"></div>
+
+          <div class="formula">
+            需要場數 = 人數 ÷ 8，無條件進位<br>
+            場地費 = 600 × 小時 × 需要場數<br>
+            教練所得 =（總金額 - 場地費）× 60%<br>
+            公司收入 =（總金額 - 場地費）× 40%
+          </div>
+        </div>
+
+        <div id="coach" class="section">
+          <h2>匹克球｜個人教練</h2>
+          <div class="grid">
+            <div>
+              <label>日期</label>
+              <input id="coachDate" type="date" />
+            </div>
+            <div>
+              <label>教練名稱</label>
+              <input id="coachCoachName" type="text" placeholder="例：小紀教練" />
+            </div>
+            <div>
+              <label>學生名稱</label>
+              <input id="coachStudentName" type="text" placeholder="例：王小明 / 王小明、陳小華" />
+            </div>
+            <div>
+              <label>上課地點</label>
+              <input id="coachLocation" type="text" placeholder="例：凱旋館" />
+            </div>
+            <div>
+              <label>人數</label>
+              <input id="coachPeople" type="number" value="1" min="1" oninput="calcCoach()" />
+            </div>
+            <div>
+              <label>堂數</label>
+              <input id="coachSessions" type="number" value="1" min="1" oninput="calcCoach()" />
+            </div>
+            <div>
+              <label>備註</label>
+              <input id="coachNote" type="text" placeholder="例：已收款 / 體驗後轉正式課" />
+            </div>
+          </div>
+
+          <div class="result">
+            <div class="box"><div class="name">單人價格</div><div class="num" id="coachUnit">NT$0</div></div>
+            <div class="box"><div class="name">總金額</div><div class="num" id="coachTotal">NT$0</div></div>
+            <div class="box"><div class="name">教練所得</div><div class="num" id="coachCoachIncome">NT$0</div></div>
+            <div class="box"><div class="name">公司收入</div><div class="num" id="coachCompany">NT$0</div></div>
+          </div>
+
+          <button class="primary" onclick="saveCoachRecord()">新增到日期紀錄</button>
+          <div id="coachSuccess" class="success"></div>
+
+          <div class="formula">
+            1 對 1：900 / 人｜1 對 2：550 / 人｜1 對 3：400 / 人｜1 對 4 以上：350 / 人<br>
+            總金額 = 人數 × 單人價格 × 堂數<br>
+            教練所得 = 總金額 × 60%｜公司收入 = 總金額 × 40%
+          </div>
+        </div>
+      </div>
+
+      <div id="tennis" class="section">
+        <h2>網球</h2>
+        <div class="placeholder">
+          網球計算區先保留。之後補上網球收費方式、場地費、教練分潤比例即可。
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>日期紀錄 / 月結對帳</h2>
+      <div class="record-controls">
+        <div>
+          <label>篩選月份</label>
+          <input id="monthFilter" type="month" onchange="renderRecords()" />
+        </div>
+        <div>
+          <label>搜尋學生 / 教練 / 地點</label>
+          <input id="keywordFilter" type="text" placeholder="輸入關鍵字" oninput="renderRecords()" />
+        </div>
+        <button class="secondary" onclick="exportCSV()">匯出 CSV</button>
+        <button class="secondary" onclick="print()">列印</button>
+        <button class="danger" onclick="clearAllRecords()">清空全部</button>
+      </div>
+
+      <div class="summary">
+        <div class="box"><div class="name">本月筆數</div><div class="num" id="sumCount">0</div></div>
+        <div class="box"><div class="name">總金額</div><div class="num" id="sumTotal">NT$0</div></div>
+        <div class="box"><div class="name">教練應收</div><div class="num" id="sumCoach">NT$0</div></div>
+        <div class="box"><div class="name">公司收入</div><div class="num" id="sumCompany">NT$0</div></div>
+      </div>
+
+      <p class="muted">紀錄會存在目前瀏覽器的本機資料中。更換手機、清除瀏覽器資料或無痕模式可能會看不到舊紀錄；月底建議匯出 CSV 備份。</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>類型</th>
+              <th>教練</th>
+              <th>學生 / 團體</th>
+              <th>地點</th>
+              <th>人數</th>
+              <th>小時/堂數</th>
+              <th>場數</th>
+              <th>總金額</th>
+              <th>場地費</th>
+              <th>教練所得</th>
+              <th>公司收入</th>
+              <th>備註</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="recordBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "ball_profit_records_v4";
+    let records = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    function today() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function currentMonth() {
+      return today().slice(0, 7);
+    }
+
+    function money(num) {
+      const n = Math.round(Number(num) || 0);
+      return "NT$" + n.toLocaleString("zh-TW");
+    }
+
+    function rawMoney(num) {
+      return Math.round(Number(num) || 0);
+    }
+
+    function showMsg(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = "block";
+      setTimeout(() => { el.style.display = "none"; }, 2200);
+    }
+
+    function showMain(id, btn) {
+      document.querySelectorAll("main > .card:first-of-type > .section").forEach(el => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.parentElement.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function showSub(id, btn) {
+      document.querySelectorAll("#pickleball > .section").forEach(el => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      btn.parentElement.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function calcCampData() {
+      const people = Number(document.getElementById("campPeople").value) || 0;
+      const hours = Number(document.getElementById("campHours").value) || 0;
+      const price = Number(document.getElementById("campPrice").value) || 0;
+      const venuePerHour = Number(document.getElementById("venuePerHour").value) || 0;
+      const peoplePerCourt = Math.max(Number(document.getElementById("peoplePerCourt").value) || 8, 1);
+      const courts = people > 0 ? Math.ceil(people / peoplePerCourt) : 0;
+      const total = people * price;
+      const venue = venuePerHour * hours * courts;
+      const distributable = total - venue;
+      const coachIncome = distributable * 0.6;
+      const companyIncome = distributable * 0.4;
+      return { people, hours, price, venuePerHour, peoplePerCourt, courts, total, venue, coachIncome, companyIncome };
+    }
+
+    function calcCamp() {
+      const d = calcCampData();
+      document.getElementById("campCourts").textContent = d.courts + " 面";
+      document.getElementById("campTotal").textContent = money(d.total);
+      document.getElementById("campVenue").textContent = money(d.venue);
+      document.getElementById("campCoachIncome").textContent = money(d.coachIncome);
+      document.getElementById("campCompany").textContent = money(d.companyIncome);
+
+      const warning = document.getElementById("campWarning");
+      if (d.total - d.venue < 0) {
+        warning.style.display = "block";
+        warning.textContent = "提醒：目前總金額低於場地費，教練與公司分潤會呈現負數。";
+      } else {
+        warning.style.display = "none";
+        warning.textContent = "";
+      }
+    }
+
+    function getCoachUnitPrice(people) {
+      if (people <= 1) return 900;
+      if (people === 2) return 550;
+      if (people === 3) return 400;
+      return 350;
+    }
+
+    function calcCoachData() {
+      const people = Math.max(Number(document.getElementById("coachPeople").value) || 1, 1);
+      const sessions = Math.max(Number(document.getElementById("coachSessions").value) || 1, 1);
+      const unit = getCoachUnitPrice(people);
+      const total = people * unit * sessions;
+      const coachIncome = total * 0.6;
+      const companyIncome = total * 0.4;
+      return { people, sessions, unit, total, venue: 0, courts: "-", coachIncome, companyIncome };
+    }
+
+    function calcCoach() {
+      const d = calcCoachData();
+      document.getElementById("coachUnit").textContent = money(d.unit);
+      document.getElementById("coachTotal").textContent = money(d.total);
+      document.getElementById("coachCoachIncome").textContent = money(d.coachIncome);
+      document.getElementById("coachCompany").textContent = money(d.companyIncome);
+    }
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+    function saveCampRecord() {
+      const d = calcCampData();
+      const record = {
+        id: Date.now(),
+        date: document.getElementById("campDate").value || today(),
+        type: "匹克球體驗營",
+        coachName: document.getElementById("campCoachName").value.trim(),
+        studentName: document.getElementById("campStudentName").value.trim(),
+        location: document.getElementById("campLocation").value.trim(),
+        people: d.people,
+        duration: d.hours + " 小時",
+        courts: d.courts,
+        total: rawMoney(d.total),
+        venue: rawMoney(d.venue),
+        coachIncome: rawMoney(d.coachIncome),
+        companyIncome: rawMoney(d.companyIncome),
+        note: document.getElementById("campNote").value.trim()
+      };
+      records.push(record);
+      saveRecords();
+      renderRecords();
+      showMsg("campSuccess", "已新增體驗營紀錄。");
+    }
+
+    function saveCoachRecord() {
+      const d = calcCoachData();
+      const record = {
+        id: Date.now(),
+        date: document.getElementById("coachDate").value || today(),
+        type: "匹克球個人教練",
+        coachName: document.getElementById("coachCoachName").value.trim(),
+        studentName: document.getElementById("coachStudentName").value.trim(),
+        location: document.getElementById("coachLocation").value.trim(),
+        people: d.people,
+        duration: d.sessions + " 堂",
+        courts: "-",
+        total: rawMoney(d.total),
+        venue: 0,
+        coachIncome: rawMoney(d.coachIncome),
+        companyIncome: rawMoney(d.companyIncome),
+        note: document.getElementById("coachNote").value.trim()
+      };
+      records.push(record);
+      saveRecords();
+      renderRecords();
+      showMsg("coachSuccess", "已新增個人教練紀錄。");
+    }
+
+    function filteredRecords() {
+      const month = document.getElementById("monthFilter").value;
+      const keyword = document.getElementById("keywordFilter").value.trim().toLowerCase();
+      return records
+        .filter(r => !month || r.date.slice(0, 7) === month)
+        .filter(r => {
+          if (!keyword) return true;
+          return [r.type, r.coachName, r.studentName, r.location, r.note].join(" ").toLowerCase().includes(keyword);
+        })
+        .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+    }
+
+    function renderRecords() {
+      const list = filteredRecords();
+      const tbody = document.getElementById("recordBody");
+      tbody.innerHTML = "";
+
+      let sumTotal = 0, sumCoach = 0, sumCompany = 0;
+      list.forEach(r => {
+        sumTotal += Number(r.total) || 0;
+        sumCoach += Number(r.coachIncome) || 0;
+        sumCompany += Number(r.companyIncome) || 0;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHTML(r.date)}</td>
+          <td>${escapeHTML(r.type)}</td>
+          <td>${escapeHTML(r.coachName || "-")}</td>
+          <td>${escapeHTML(r.studentName || "-")}</td>
+          <td>${escapeHTML(r.location || "-")}</td>
+          <td>${escapeHTML(String(r.people))}</td>
+          <td>${escapeHTML(r.duration)}</td>
+          <td>${escapeHTML(String(r.courts))}</td>
+          <td>${money(r.total)}</td>
+          <td>${money(r.venue)}</td>
+          <td>${money(r.coachIncome)}</td>
+          <td>${money(r.companyIncome)}</td>
+          <td>${escapeHTML(r.note || "-")}</td>
+          <td><button class="delete-btn" onclick="deleteRecord(${r.id})">刪除</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (list.length === 0) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td colspan="14" style="text-align:center;color:#6b7280;">目前沒有紀錄</td>`;
+        tbody.appendChild(tr);
+      }
+
+      document.getElementById("sumCount").textContent = list.length;
+      document.getElementById("sumTotal").textContent = money(sumTotal);
+      document.getElementById("sumCoach").textContent = money(sumCoach);
+      document.getElementById("sumCompany").textContent = money(sumCompany);
+    }
+
+    function deleteRecord(id) {
+      if (!confirm("確定要刪除這筆紀錄嗎？")) return;
+      records = records.filter(r => r.id !== id);
+      saveRecords();
+      renderRecords();
+    }
+
+    function clearAllRecords() {
+      if (!confirm("確定要清空全部紀錄嗎？這個動作無法復原。")) return;
+      records = [];
+      saveRecords();
+      renderRecords();
+    }
+
+    function exportCSV() {
+      const list = filteredRecords();
+      const headers = ["日期", "類型", "教練", "學生/團體", "地點", "人數", "小時/堂數", "場數", "總金額", "場地費", "教練所得", "公司收入", "備註"];
+      const rows = list.map(r => [
+        r.date, r.type, r.coachName, r.studentName, r.location, r.people, r.duration, r.courts,
+        r.total, r.venue, r.coachIncome, r.companyIncome, r.note
+      ]);
+      const csv = [headers, ...rows].map(row => row.map(cell => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\\n");
+      const blob = new Blob(["\\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const month = document.getElementById("monthFilter").value || "all";
+      a.href = url;
+      a.download = `球課收益紀錄_${month}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHTML(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.getElementById("campDate").value = today();
+    document.getElementById("coachDate").value = today();
+    document.getElementById("monthFilter").value = currentMonth();
+
+    calcCamp();
+    calcCoach();
+    renderRecords();
+  </script>
+</body>
+</html>
